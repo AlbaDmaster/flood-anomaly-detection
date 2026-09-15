@@ -15,7 +15,7 @@ import requests
 REGIONS = {
     "nairobi": {"lat": -1.2864, "lon": 36.8172},
     "kisumu": {"lat": -0.1022, "lon": 34.7617},
-    "tana_river_hola": {"lat": -1.4941, "lon": 40.0280},
+    "tana_river_hola": {"lat": -1.4941, "lon": 39.9780},
 }
 
 START_DATE = "2015-01-01"
