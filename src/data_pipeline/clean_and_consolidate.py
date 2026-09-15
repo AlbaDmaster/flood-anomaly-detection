@@ -28,7 +28,7 @@ COLUMN_RENAME = {
     "precipitation_sum": "rainfall",
     "temperature_2m_mean": "temperature",
     "relative_humidity_2m_mean": "humidity",
-    "soil_moisture_0_to_10cm_mean": "soil_moisture",
+    "soil_moisture_0_to_7cm_mean": "soil_moisture",
     "river_discharge": "river_discharge",
 }
 

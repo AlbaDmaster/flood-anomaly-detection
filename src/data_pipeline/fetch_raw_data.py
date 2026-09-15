@@ -26,7 +26,7 @@ WEATHER_DAILY_VARS = [
     "precipitation_sum",
     "temperature_2m_mean",
     "relative_humidity_2m_mean",
-    "soil_moisture_0_to_10cm_mean",
+    "soil_moisture_0_to_7cm_mean",
 ]
 
 FLOOD_URL = "https://flood-api.open-meteo.com/v1/flood"
@@ -50,6 +50,19 @@ def fetch(url: str, params: dict, retries: int = 3, backoff: float = 2.0) -> dic
             if attempt < retries:
                 time.sleep(backoff * attempt)
     raise RuntimeError(f"Failed to fetch {url} with params {params}") from last_error
+
+
+def check_for_all_null_columns(data: dict, region: str, source: str) -> None:
+    """Catch a wrong/unsupported variable name immediately, not two steps later."""
+    daily = data.get("daily", {})
+    for key, values in daily.items():
+        if key == "time":
+            continue
+        non_null = sum(1 for v in values if v is not None)
+        if non_null == 0:
+            print(f"  *** WARNING: [{region}/{source}] '{key}' came back 100% null. "
+                  f"This usually means the variable name is wrong for this endpoint "
+                  f"-- double-check it against the Open-Meteo docs before trusting this file.")
 
 
 def fetch_weather(lat: float, lon: float) -> dict:
@@ -88,11 +101,15 @@ def main():
         lat, lon = coords["lat"], coords["lon"]
 
         print(f"[{region}] fetching weather data...")
-        save_json(fetch_weather(lat, lon), f"{region}_weather.json")
+        weather_data = fetch_weather(lat, lon)
+        check_for_all_null_columns(weather_data, region, "weather")
+        save_json(weather_data, f"{region}_weather.json")
         time.sleep(1)
 
         print(f"[{region}] fetching river discharge data...")
-        save_json(fetch_flood(lat, lon), f"{region}_flood.json")
+        flood_data = fetch_flood(lat, lon)
+        check_for_all_null_columns(flood_data, region, "flood")
+        save_json(flood_data, f"{region}_flood.json")
         time.sleep(1)
 
     print("\nDone. 6 files should now be in data/raw/")
