@@ -29,7 +29,7 @@ MIN_HISTORY_DAYS = max(LAGS) + 1
 _loaded_models = {}
 
 
-def _load_model(region: str) -> dict:
+def load_model(region: str) -> dict:
     if region not in _loaded_models:
         path = MODELS_DIR / f"isolation_forest_{region}.joblib"
         if not path.exists():
@@ -56,7 +56,7 @@ def predict_anomaly(region: str, recent_readings: pd.DataFrame) -> dict:
             f"for this region from SENSOR_READING before calling this."
         )
 
-    bundle = _load_model(region)
+    bundle = load_model(region)
     model = bundle["model"]
     feature_cols = bundle["feature_cols"]
     moderate_threshold = bundle["moderate_threshold"]
