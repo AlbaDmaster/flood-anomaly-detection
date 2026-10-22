@@ -36,9 +36,11 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     from app import models  # noqa: F401  registers the tables with SQLAlchemy
     from app.auth import auth
     from app.cli import register_cli
+    from app.pages import pages
     from app.routes import api
     app.register_blueprint(api)
     app.register_blueprint(auth)
+    app.register_blueprint(pages)
     register_cli(app)
 
     return app

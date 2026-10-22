@@ -22,7 +22,7 @@ PASSWORD = "correct-horse-1"
 def app():
     app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": database_url(TEST_DB)})
 
-    @app.get("/test/staff-only")
+    @app.get("/api/test/staff-only")
     @roles_required(*STAFF_ROLES)
     def staff_only():
         return jsonify(ok=True)
@@ -101,14 +101,14 @@ def test_login_logout_and_me(client):
 
 
 def test_roles_required_returns_401_403_200(client):
-    assert client.get("/test/staff-only").status_code == 401
+    assert client.get("/api/test/staff-only").status_code == 401
     make_user("public")
     login(client, "public@example.com")
-    assert client.get("/test/staff-only").status_code == 403
+    assert client.get("/api/test/staff-only").status_code == 403
     for role in STAFF_ROLES:
         make_user(role)
         login(client, f"{role}@example.com")
-        assert client.get("/test/staff-only").status_code == 200, role
+        assert client.get("/api/test/staff-only").status_code == 200, role
 
 
 def test_cli_create_and_list_users(app):

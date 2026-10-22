@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<main class="auth-card">
+  <h1>Create an account</h1>
+  <p class="subtitle">Public accounts can view regions and alerts</p>
+  <form id="register-form" novalidate>
+    <label for="name">Full name</label>
+    <input id="name" name="name" autocomplete="name" maxlength="150" required>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" autocomplete="email" maxlength="150" required>
+    <label for="phone">Phone (optional)</label>
+    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20">
+    <label for="password">Password (at least 8 characters)</label>
+    <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+    <button type="submit" class="primary">Create account</button>
+  </form>
+  <p class="switch">Already registered? <a href="{{ url_for('pages.login') }}">Sign in</a></p>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/auth.js') }}"></script>{% endblock %}

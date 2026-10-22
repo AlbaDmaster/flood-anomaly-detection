@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Not allowed{% endblock %}
+{% block heading %}Not allowed{% endblock %}
+{% block content %}
+<section class="panel"><p>Your account ({{ current_user.role }}) cannot open this page.
+<a href="{{ url_for('pages.overview') }}">Back to the overview</a>.</p></section>
+{% endblock %}

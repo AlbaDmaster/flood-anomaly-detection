@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<main class="auth-card">
+  <h1>Flood Anomaly Detection</h1>
+  <p class="subtitle">Early warning &amp; risk monitoring</p>
+  <form id="login-form" data-next="{{ next_url }}" novalidate>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" autocomplete="username" placeholder="name@agency.go.ke" required>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <label class="check"><input id="remember" type="checkbox"> Keep me signed in</label>
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+    <button type="submit" class="primary">Sign in</button>
+  </form>
+  <p class="switch">No account? <a href="{{ url_for('pages.register') }}">Register for public alerts</a></p>
+  <p class="roles-note">Role-based access: Authority · Responder · Public · Administrator</p>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/auth.js') }}"></script>{% endblock %}

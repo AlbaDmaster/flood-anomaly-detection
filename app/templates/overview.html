@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block heading %}Monitoring overview{% endblock %}
+{% block content %}
+<section class="kpis" aria-label="Summary">
+  <div class="kpi kpi-green"><p>Regions monitored</p><strong id="kpi-regions">–</strong></div>
+  <div class="kpi kpi-amber"><p>Active alerts</p><strong id="kpi-alerts">–</strong></div>
+  <div class="kpi kpi-red"><p>High-risk zones</p><strong id="kpi-risk">–</strong></div>
+  <div class="kpi kpi-blue"><p>Avg. anomaly score</p><strong id="kpi-score">–</strong></div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Recent alerts</h2><a href="{{ url_for('pages.alerts') }}">View all</a></div>
+  <table class="table">
+    <thead><tr><th>Region</th><th>Date</th><th>Severity</th><th>Score</th><th>Status</th></tr></thead>
+    <tbody id="recent-alerts"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+  </table>
+</section>
+<p class="muted small" id="updated"></p>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/overview.js') }}"></script>{% endblock %}

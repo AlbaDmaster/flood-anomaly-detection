@@ -17,7 +17,7 @@ import re
 from functools import wraps
 
 import click
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -40,7 +40,9 @@ def load_user(user_id: str):
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    return jsonify(error="login required"), 401
+    if request.path.startswith("/api/"):
+        return jsonify(error="login required"), 401
+    return redirect(url_for("pages.login", next=request.full_path.rstrip("?")))
 
 
 def roles_required(*roles):
@@ -50,6 +52,8 @@ def roles_required(*roles):
         @login_required
         def wrapped(*args, **kwargs):
             if getattr(current_user, "role", None) not in roles:
+                if not request.path.startswith("/api/"):
+                    abort(403)
                 return jsonify(error="you do not have permission to do this"), 403
             return view(*args, **kwargs)
         return wrapped
