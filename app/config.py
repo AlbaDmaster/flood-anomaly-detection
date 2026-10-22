@@ -1,7 +1,7 @@
 """
-Reads the database settings from .env (never committed) and builds the
-SQLAlchemy connection URL. URL.create escapes any special characters in
-the password, so the password never has to be hand-encoded.
+Reads settings from .env (never committed): the database connection and the
+SECRET_KEY that signs login session cookies. URL.create escapes any special
+characters in the password, so it never has to be hand-encoded.
 """
 import os
 from pathlib import Path
@@ -32,3 +32,8 @@ def database_url(database: str | None = None) -> str:
         query={"charset": "utf8mb4"},
     )
     return url.render_as_string(hide_password=False)
+
+
+def secret_key() -> str | None:
+    load_dotenv(ROOT / ".env")
+    return os.getenv("SECRET_KEY")

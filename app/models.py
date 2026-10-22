@@ -4,6 +4,8 @@ file is the source of truth: these classes describe the existing tables and
 never create or alter them. Table names are uppercase because MySQL table
 names are case-sensitive on Linux.
 """
+from flask_login import UserMixin
+
 from app.extensions import db
 
 SEVERITY_LEVELS = ("normal", "moderate", "high")
@@ -69,7 +71,7 @@ class Alert(db.Model):
     feedback = db.relationship("Feedback", back_populates="alert")
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "USER"
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -80,6 +82,13 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
 
     feedback = db.relationship("Feedback", back_populates="user")
+
+    def get_id(self) -> str:  # Flask-Login stores this in the session cookie
+        return str(self.user_id)
+
+    def to_dict(self) -> dict:
+        return {"user_id": self.user_id, "name": self.name, "email": self.email,
+                "phone": self.phone, "role": self.role}
 
 
 class Feedback(db.Model):
