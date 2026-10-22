@@ -135,11 +135,14 @@ def ingest_live(slugs: list[str], days: int = 30, echo=print) -> dict[str, int]:
     return results
 
 
-def replay(slugs: list[str], start, end, history_days: int = 30, delay: float = 0.0, echo=print) -> int:
+def replay(slugs: list[str], start, end, history_days: int = 30, delay: float = 0.0,
+           echo=print, after_day=None) -> int:
     """
     Load `history_days` days before `start` in one go (so the model has
     context for lags and rolling windows), then feed `start`..`end` one day
-    at a time, waiting `delay` seconds between days.
+    at a time, waiting `delay` seconds between days. If given, `after_day()`
+    runs after the history load and after every day (used to score new
+    readings and raise alerts as they arrive).
     """
     start, end = pd.Timestamp(start).normalize(), pd.Timestamp(end).normalize()
     if end < start:
@@ -166,12 +169,16 @@ def replay(slugs: list[str], start, end, history_days: int = 30, delay: float = 
         total += sum(loaded.values())
         echo(f"history {history_days} days before {start.date()}: "
              + "  ".join(f"{slug} +{n}" for slug, n in loaded.items()))
+        if after_day:
+            after_day()
 
     for day in pd.date_range(start, end, freq="D"):
         today_rows = window[window["date"] == day]
         added = {slug: insert_readings(slug, today_rows[today_rows["region"] == slug]) for slug in slugs}
         total += sum(added.values())
         echo(f"{day.date()}  " + "  ".join(f"{slug} +{n}" for slug, n in added.items()))
+        if after_day:
+            after_day()
         if delay and day < end:
             time.sleep(delay)
     return total
