@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
 
 
-def database_url() -> str:
+def database_url(database: str | None = None) -> str:
+    """Connection URL from .env. Pass `database` to target another schema (e.g. the test database)."""
     load_dotenv(ROOT / ".env")
     missing = [key for key in REQUIRED if not os.getenv(key)]
     if missing:
@@ -27,7 +28,7 @@ def database_url() -> str:
         password=os.environ["DB_PASSWORD"],
         host=os.environ["DB_HOST"],
         port=int(os.environ["DB_PORT"]),
-        database=os.environ["DB_NAME"],
+        database=database or os.environ["DB_NAME"],
         query={"charset": "utf8mb4"},
     )
     return url.render_as_string(hide_password=False)

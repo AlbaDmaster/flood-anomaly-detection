@@ -1,6 +1,7 @@
 """
 Flask application factory. Builds the app, points SQLAlchemy at the MySQL
-database described in .env, and registers the API routes.
+database described in .env, and registers the API routes and the
+command-line ingestion commands (flask --app run ingest-live / replay).
 
 Start the server from the project root with: python run.py
 """
@@ -22,7 +23,9 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     db.init_app(app)
 
     from app import models  # noqa: F401  registers the tables with SQLAlchemy
+    from app.cli import register_cli
     from app.routes import api
     app.register_blueprint(api)
+    register_cli(app)
 
     return app
