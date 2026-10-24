@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from app.auth import roles_required
+from app.auth import STAFF_ROLES, roles_required
 
 pages = Blueprint("pages", __name__)
 
@@ -74,8 +74,8 @@ def regions():
 @pages.get("/alerts")
 @login_required
 def alerts():
-    return render_template("coming_soon.html", active="pages.alerts", title="Alerts",
-                           note="The full alerts list with filters and acknowledgement is built next.")
+    return render_template("alerts.html", active="pages.alerts",
+                           can_act=current_user.role in STAFF_ROLES)
 
 
 @pages.get("/users")

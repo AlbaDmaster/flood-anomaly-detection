@@ -115,3 +115,31 @@ button.secondary:hover { background: var(--blue-bg); }
   .two-col { grid-template-columns: 1fr; }
   .region-cards { grid-template-columns: 1fr; }
 }
+
+/* alerts page */
+.table-wrap { position: relative; overflow-x: auto; }
+.filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 14px; font-size: .9rem; }
+.filters label { display: flex; flex-direction: column; gap: 4px; }
+.filters select { padding: 7px 8px; border: 1px solid #7d8794; border-radius: 4px; font: inherit; background: var(--panel); min-width: 150px; }
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; }
+button.secondary:disabled, button.primary:disabled { opacity: .5; cursor: not-allowed; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+dialog { width: min(560px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 6px; padding: 20px 22px; color: var(--text); }
+dialog::backdrop { background: rgba(31, 41, 51, .45); }
+.dialog-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.dialog-head h2 { font-size: 1.15rem; }
+dialog h3 { font-size: 1rem; margin: 18px 0 8px; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0 0 12px; font-size: .92rem; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; text-transform: capitalize; }
+.actions { display: flex; gap: 10px; }
+.actions button.primary { margin-top: 0; padding: 9px 16px; }
+.feedback-form { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; font-size: .92rem; }
+.feedback-form fieldset { border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.feedback-form legend { padding: 0 4px; color: var(--muted); }
+.feedback-form .check { display: flex; gap: 6px; align-items: center; }
+.feedback-form textarea { padding: 8px; border: 1px solid #7d8794; border-radius: 4px; font: inherit; resize: vertical; }
+.feedback-form button { align-self: flex-start; }
+.feedback-list { list-style: none; padding: 0; margin: 0; font-size: .92rem; }
+.feedback-list li { padding: 8px 0; border-bottom: 1px solid #eef1f4; }
+.feedback-list p { margin: 4px 0 0; }

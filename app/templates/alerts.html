@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+{% block heading %}Alerts{% endblock %}
+{% block content %}
+<section class="panel" id="alerts-page" data-can-act="{{ 'true' if can_act else 'false' }}">
+  <form id="filters" class="filters">
+    <label>Region <select id="f-region"><option value="">All regions</option></select></label>
+    <label>Severity
+      <select id="f-severity">
+        <option value="">All</option><option value="high">High</option><option value="moderate">Moderate</option>
+      </select>
+    </label>
+    <label>Status
+      <select id="f-status">
+        <option value="">All</option><option value="pending">Pending</option><option value="acknowledged">Acknowledged</option>
+        <option value="sent">Sent</option><option value="failed">Failed</option>
+      </select>
+    </label>
+    <button type="submit" class="secondary">Apply</button>
+  </form>
+  <p class="form-error" id="list-error" role="alert" hidden></p>
+  <div class="table-wrap">
+  <table class="table" aria-label="Alerts">
+    <thead><tr><th>Date</th><th>Region</th><th>Severity</th><th>Score</th><th>Status</th><th>Feedback</th><th><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody id="alert-rows"><tr><td colspan="7" class="muted">Loading…</td></tr></tbody>
+  </table>
+  </div>
+  <div class="pager">
+    <button type="button" class="secondary" id="prev">Previous</button>
+    <span id="page-info" class="muted small" aria-live="polite"></span>
+    <button type="button" class="secondary" id="next">Next</button>
+  </div>
+</section>
+
+<dialog id="alert-dialog" aria-labelledby="dialog-title">
+  <div class="dialog-head">
+    <h2 id="dialog-title">Alert</h2>
+    <button type="button" class="link-button" id="dialog-close">Close</button>
+  </div>
+  <p id="dialog-message"></p>
+  <dl class="facts" id="dialog-facts"></dl>
+  <p class="form-error" id="dialog-error" role="alert" hidden></p>
+  {% if can_act %}
+  <div class="actions">
+    <button type="button" class="primary" id="acknowledge">Acknowledge</button>
+  </div>
+  <form id="feedback-form" class="feedback-form">
+    <fieldset>
+      <legend>Field feedback</legend>
+      <label class="check"><input type="radio" name="verdict" value="true"> Confirmed flood risk</label>
+      <label class="check"><input type="radio" name="verdict" value="false"> False alarm</label>
+    </fieldset>
+    <label for="comment">Comment (optional)</label>
+    <textarea id="comment" maxlength="2000" rows="3" placeholder="What was observed on the ground?"></textarea>
+    <button type="submit" class="secondary">Save feedback</button>
+  </form>
+  {% else %}
+  <p class="muted small">Only responders, authorities and administrators can acknowledge alerts or give feedback.</p>
+  {% endif %}
+  <h3>Feedback so far</h3>
+  <ul id="feedback-list" class="feedback-list"></ul>
+</dialog>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>{% endblock %}

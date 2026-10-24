@@ -101,8 +101,19 @@ def test_overview_and_regions_pages_have_charts_and_map(client):
     assert b'id="weather-chart"' in regions.data and b"vendor/chart.umd.js" in regions.data
 
 
+def test_alerts_page_shows_staff_actions_only_to_staff(client):
+    sign_in(client, "public")
+    public_page = client.get("/alerts")
+    assert public_page.status_code == 200
+    assert b'data-can-act="false"' in public_page.data and b'id="feedback-form"' not in public_page.data
+    client.post("/api/auth/logout")
+    sign_in(client, "administrator")
+    staff_page = client.get("/alerts")
+    assert b'data-can-act="true"' in staff_page.data and b'id="feedback-form"' in staff_page.data
+
+
 @pytest.mark.parametrize("path", [
-    "/static/css/app.css", "/static/js/api.js", "/static/js/charts.js", "/static/js/regions.js",
+    "/static/css/app.css", "/static/js/api.js", "/static/js/charts.js", "/static/js/regions.js", "/static/js/alerts.js",
     "/static/vendor/chart.umd.js", "/static/vendor/leaflet.js", "/static/vendor/leaflet.css",
 ])
 def test_static_files_are_served(client, path):
