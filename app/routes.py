@@ -10,7 +10,7 @@ REST API used by the dashboard. Every endpoint returns JSON.
   POST  /api/alerts/<id>/feedback          staff: {"is_confirmed": true|false, "comment": "..."}
   GET   /api/admin/users                   administrator
   POST  /api/admin/users                   administrator: create a user with any role
-  PATCH /api/admin/users/<id>              administrator: {"role": "..."}
+  PATCH /api/admin/users/<id>              administrator: any of name, phone, role, is_active
 
 All endpoints except /api/health need a logged-in user (any role); the ones
 marked staff need responder, authority or administrator.
@@ -334,15 +334,45 @@ def admin_create_user():
 
 @api.patch("/admin/users/<int:user_id>")
 @roles_required("administrator")
-def admin_change_role(user_id):
+def admin_update_user(user_id):
+    """Change any of: name, phone, role, is_active. Administrators cannot demote or deactivate themselves."""
     user = db.session.get(User, user_id)
     if user is None:
         return error("user not found", 404)
-    role = json_body().get("role")
-    if role not in USER_ROLES:
-        return error(f"role must be one of {', '.join(USER_ROLES)}", 400)
-    if user.user_id == current_user.user_id and role != user.role:
-        return error("you cannot change your own role", 400)
-    user.role = role
+    data = json_body()
+    changes = {key: data[key] for key in ("name", "phone", "role", "is_active") if key in data}
+    if not changes:
+        return error("send at least one of: name, phone, role, is_active", 400)
+    is_self = user.user_id == current_user.user_id
+
+    if "name" in changes:
+        if not isinstance(changes["name"], str) or not changes["name"].strip():
+            return error("name is required", 400)
+        if len(changes["name"].strip()) > 150:
+            return error("name must be at most 150 characters", 400)
+    if "phone" in changes:
+        if changes["phone"] is not None and not isinstance(changes["phone"], str):
+            return error("phone must be text", 400)
+        if len((changes["phone"] or "").strip()) > 20:
+            return error("phone must be at most 20 characters", 400)
+    if "role" in changes:
+        if changes["role"] not in USER_ROLES:
+            return error(f"role must be one of {', '.join(USER_ROLES)}", 400)
+        if is_self and changes["role"] != user.role:
+            return error("you cannot change your own role", 400)
+    if "is_active" in changes:
+        if not isinstance(changes["is_active"], bool):
+            return error("is_active must be true or false", 400)
+        if is_self and not changes["is_active"]:
+            return error("you cannot deactivate your own account", 400)
+
+    if "name" in changes:
+        user.name = changes["name"].strip()
+    if "phone" in changes:
+        user.phone = (changes["phone"] or "").strip() or None
+    if "role" in changes:
+        user.role = changes["role"]
+    if "is_active" in changes:
+        user.is_active = changes["is_active"]
     db.session.commit()
     return jsonify(user=user.to_dict())

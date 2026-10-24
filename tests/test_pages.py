@@ -76,7 +76,9 @@ def test_administrator_sees_users_menu(client):
     sign_in(client, "administrator")
     page = client.get("/")
     assert b'href="/users"' in page.data
-    assert client.get("/users").status_code == 200
+    users_page = client.get("/users")
+    assert users_page.status_code == 200
+    assert b'id="add-user"' in users_page.data and b'id="user-rows"' in users_page.data
 
 
 def test_signed_in_user_is_sent_on_from_login_page(client):
@@ -113,7 +115,7 @@ def test_alerts_page_shows_staff_actions_only_to_staff(client):
 
 
 @pytest.mark.parametrize("path", [
-    "/static/css/app.css", "/static/js/api.js", "/static/js/charts.js", "/static/js/regions.js", "/static/js/alerts.js",
+    "/static/css/app.css", "/static/js/api.js", "/static/js/charts.js", "/static/js/regions.js", "/static/js/alerts.js", "/static/js/users.js",
     "/static/vendor/chart.umd.js", "/static/vendor/leaflet.js", "/static/vendor/leaflet.css",
 ])
 def test_static_files_are_served(client, path):

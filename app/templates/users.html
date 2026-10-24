@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block heading %}Users{% endblock %}
+{% block content %}
+<section class="panel" id="users-page" data-me="{{ current_user.user_id }}">
+  <div class="panel-head"><h2>Add a user</h2></div>
+  <form id="add-user" class="user-form" novalidate>
+    <label>Full name <input id="new-name" maxlength="150" autocomplete="off" required></label>
+    <label>Email <input id="new-email" type="email" maxlength="150" autocomplete="off" required></label>
+    <label>Phone (optional) <input id="new-phone" type="tel" maxlength="20" autocomplete="off"></label>
+    <label>Role
+      <select id="new-role">
+        {% for role in roles %}<option value="{{ role }}"{% if role == 'responder' %} selected{% endif %}>{{ role|capitalize }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Initial password <input id="new-password" type="password" minlength="8" autocomplete="new-password" required></label>
+    <button type="submit" class="primary">Add user</button>
+  </form>
+  <p class="form-error" id="add-error" role="alert" hidden></p>
+  <p class="form-ok" id="add-ok" role="status" hidden></p>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>All users</h2><span class="muted small" id="user-count"></span></div>
+  <p class="form-error" id="list-error" role="alert" hidden></p>
+  <div class="table-wrap">
+  <table class="table" aria-label="Users">
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody id="user-rows"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+  </table>
+  </div>
+</section>
+
+<dialog id="user-dialog" aria-labelledby="user-dialog-title">
+  <div class="dialog-head">
+    <h2 id="user-dialog-title">Edit user</h2>
+    <button type="button" class="link-button" id="user-dialog-close">Close</button>
+  </div>
+  <p class="muted small" id="edit-email"></p>
+  <form id="edit-user" class="feedback-form" novalidate>
+    <label for="edit-name">Full name</label>
+    <input id="edit-name" maxlength="150" required>
+    <label for="edit-phone">Phone (optional)</label>
+    <input id="edit-phone" type="tel" maxlength="20">
+    <label for="edit-role">Role</label>
+    <select id="edit-role">
+      {% for role in roles %}<option value="{{ role }}">{{ role|capitalize }}</option>{% endfor %}
+    </select>
+    <label class="check"><input type="checkbox" id="edit-active"> Account active (unticked = cannot sign in)</label>
+    <p class="muted small" id="self-note" hidden>You cannot change your own role or deactivate your own account.</p>
+    <p class="form-error" id="edit-error" role="alert" hidden></p>
+    <button type="submit" class="primary">Save changes</button>
+  </form>
+</dialog>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/users.js') }}"></script>{% endblock %}

@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `USER` (
     phone VARCHAR(20),
     role ENUM('authority', 'responder', 'public', 'administrator') NOT NULL DEFAULT 'public',
     password_hash VARCHAR(255) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     UNIQUE KEY uq_user_email (email)
 );
 

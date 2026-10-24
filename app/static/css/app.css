@@ -143,3 +143,12 @@ dialog h3 { font-size: 1rem; margin: 18px 0 8px; }
 .feedback-list { list-style: none; padding: 0; margin: 0; font-size: .92rem; }
 .feedback-list li { padding: 8px 0; border-bottom: 1px solid #eef1f4; }
 .feedback-list p { margin: 4px 0 0; }
+
+/* users page */
+.user-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; font-size: .9rem; }
+.user-form label { display: flex; flex-direction: column; gap: 4px; }
+.user-form input, .user-form select, #edit-user input:not([type=checkbox]), #edit-user select {
+  padding: 8px; border: 1px solid #7d8794; border-radius: 4px; font: inherit; background: var(--panel); }
+.user-form button.primary { margin-top: 0; }
+.form-ok { margin: 10px 0 0; padding: 8px 10px; background: var(--green-bg); color: var(--green); border-radius: 4px; font-size: .9rem; }
+tr.inactive td { color: var(--muted); }

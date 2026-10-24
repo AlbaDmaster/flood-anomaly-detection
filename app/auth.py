@@ -35,7 +35,8 @@ auth = Blueprint("auth", __name__, url_prefix="/api/auth", cli_group="users")
 
 @login_manager.user_loader
 def load_user(user_id: str):
-    return db.session.get(User, int(user_id))
+    user = db.session.get(User, int(user_id))
+    return user if user is not None and user.is_active else None  # deactivated users are signed out
 
 
 @login_manager.unauthorized_handler
@@ -117,6 +118,8 @@ def login():
     password_ok = check_password_hash(user.password_hash if user else _DUMMY_HASH, str(data.get("password", "")))
     if user is None or not password_ok:
         return jsonify(error="incorrect email or password"), 401
+    if not user.is_active:
+        return jsonify(error="this account has been deactivated - contact an administrator"), 403
     login_user(user, remember=bool(data.get("remember")))
     return jsonify(user=user.to_dict())
 
@@ -156,4 +159,5 @@ def create_user_command(name, email, role, phone, password):
 def list_users_command():
     """List all users and their roles."""
     for user in db.session.execute(db.select(User).order_by(User.user_id)).scalars():
-        click.echo(f"#{user.user_id:<4} {user.role:14s} {user.email}  ({user.name})")
+        status = "" if user.is_active else "  [deactivated]"
+        click.echo(f"#{user.user_id:<4} {user.role:14s} {user.email}  ({user.name}){status}")

@@ -39,7 +39,7 @@ def seeded(app):
                          echo=lambda *_: None, after_day=lambda: scoring.score_pending(["tana_river_hola"]))
         for role in ("public", "responder", "administrator"):
             create_user(role.title(), f"{role}@example.com", PASSWORD, role=role)
-        yield
+    yield  # outside the app context, so every test request gets a fresh one like in production
 
 
 @pytest.fixture
@@ -171,3 +171,43 @@ def test_only_administrators_manage_users(client):
 def test_unknown_api_paths_return_json(client):
     response = client.get("/api/does-not-exist")
     assert response.status_code == 404 and response.get_json()["error"] == "not found"
+
+
+def test_admin_edits_and_deactivates_users(client):
+    as_role(client, "administrator")
+    users = {u["email"]: u for u in client.get("/api/admin/users").get_json()["users"]}
+    assert all(u["is_active"] for u in users.values())
+    responder_id = users["responder@example.com"]["user_id"]
+
+    response = client.patch(f"/api/admin/users/{responder_id}", json={"name": "  Field Team A ", "phone": "0712345678"})
+    assert response.status_code == 200
+    assert response.get_json()["user"]["name"] == "Field Team A" and response.get_json()["user"]["phone"] == "0712345678"
+    assert client.patch(f"/api/admin/users/{responder_id}", json={"name": ""}).status_code == 400
+    assert client.patch(f"/api/admin/users/{responder_id}", json={"phone": "0" * 21}).status_code == 400
+    assert client.patch(f"/api/admin/users/{responder_id}", json={"is_active": "no"}).status_code == 400
+    assert client.patch(f"/api/admin/users/{responder_id}", json={}).status_code == 400
+
+    own_id = users["administrator@example.com"]["user_id"]
+    assert client.patch(f"/api/admin/users/{own_id}", json={"is_active": False}).status_code == 400
+    assert client.patch(f"/api/admin/users/{own_id}", json={"name": "Chief Admin"}).status_code == 200
+
+    response = client.patch(f"/api/admin/users/{responder_id}", json={"is_active": False})
+    assert response.status_code == 200 and response.get_json()["user"]["is_active"] is False
+
+
+def test_deactivated_user_cannot_sign_in_and_is_signed_out(app):
+    responder, admin = app.test_client(), app.test_client()
+    login = {"email": "responder@example.com", "password": PASSWORD}
+    assert responder.post("/api/auth/login", json=login).status_code == 200
+    assert responder.get("/api/auth/me").status_code == 200
+    as_role(admin, "administrator")
+    responder_id = next(u["user_id"] for u in admin.get("/api/admin/users").get_json()["users"]
+                        if u["email"] == "responder@example.com")
+    assert admin.patch(f"/api/admin/users/{responder_id}", json={"is_active": False}).status_code == 200
+
+    assert responder.get("/api/auth/me").status_code == 401          # existing session ends
+    again = responder.post("/api/auth/login", json=login)
+    assert again.status_code == 403 and "deactivated" in again.get_json()["error"]
+
+    admin.patch(f"/api/admin/users/{responder_id}", json={"is_active": True})
+    assert responder.post("/api/auth/login", json=login).status_code == 200

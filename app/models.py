@@ -80,6 +80,7 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(20))
     role = db.Column(db.Enum(*USER_ROLES, name="role"), nullable=False, server_default="public")
     password_hash = db.Column(db.String(255), nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())  # also read by Flask-Login
 
     feedback = db.relationship("Feedback", back_populates="user")
 
@@ -88,7 +89,7 @@ class User(UserMixin, db.Model):
 
     def to_dict(self) -> dict:
         return {"user_id": self.user_id, "name": self.name, "email": self.email,
-                "phone": self.phone, "role": self.role}
+                "phone": self.phone, "role": self.role, "is_active": self.is_active}
 
 
 class Feedback(db.Model):

@@ -10,6 +10,7 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app.auth import STAFF_ROLES, roles_required
+from app.models import USER_ROLES
 
 pages = Blueprint("pages", __name__)
 
@@ -81,5 +82,4 @@ def alerts():
 @pages.get("/users")
 @roles_required("administrator")
 def users():
-    return render_template("coming_soon.html", active="pages.users", title="Users",
-                           note="User and role management is built next.")
+    return render_template("users.html", active="pages.users", roles=USER_ROLES)
