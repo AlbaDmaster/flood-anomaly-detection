@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Overview{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet.css') }}">{% endblock %}
 {% block heading %}Monitoring overview{% endblock %}
 {% block content %}
 <section class="kpis" aria-label="Summary">
@@ -8,6 +9,20 @@
   <div class="kpi kpi-red"><p>High-risk zones</p><strong id="kpi-risk">–</strong></div>
   <div class="kpi kpi-blue"><p>Avg. anomaly score</p><strong id="kpi-score">–</strong></div>
 </section>
+<div class="two-col">
+  <section class="panel">
+    <div class="panel-head"><h2>Anomaly score trend</h2><a href="{{ url_for('pages.regions') }}">Region details</a></div>
+    <div class="chart-box"><canvas id="trend-chart" aria-label="Anomaly score per region over time" role="img"></canvas></div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>Regional risk map</h2></div>
+    <div id="risk-map" class="map" role="region" aria-label="Map of monitored regions coloured by latest severity"></div>
+    <p class="legend small">
+      <span class="dot dot-high"></span>High <span class="dot dot-moderate"></span>Moderate
+      <span class="dot dot-normal"></span>Normal <span class="dot dot-none"></span>Not scored
+    </p>
+  </section>
+</div>
 <section class="panel">
   <div class="panel-head"><h2>Recent alerts</h2><a href="{{ url_for('pages.alerts') }}">View all</a></div>
   <table class="table">
@@ -17,4 +32,9 @@
 </section>
 <p class="muted small" id="updated"></p>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/overview.js') }}"></script>{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/leaflet.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/overview.js') }}"></script>
+{% endblock %}

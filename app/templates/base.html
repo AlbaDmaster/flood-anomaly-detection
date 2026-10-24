@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Flood EWS{% endblock %} · Flood Anomaly Detection</title>
   <link rel="icon" href="data:,">
+  {% block head %}{% endblock %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body class="{% block body_class %}app{% endblock %}">

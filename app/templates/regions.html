@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Regions{% endblock %}
+{% block heading %}Regions{% endblock %}
+{% block content %}
+<section class="region-cards" id="region-cards" aria-label="Monitored regions"><p class="muted">Loading…</p></section>
+<section class="panel">
+  <div class="panel-head wrap">
+    <h2 id="detail-title">Anomaly score</h2>
+    <form id="range-form" class="range">
+      <label>From <input type="date" id="start" required></label>
+      <label>To <input type="date" id="end" required></label>
+      <button type="submit" class="secondary">Show</button>
+    </form>
+  </div>
+  <p class="form-error" id="range-error" role="alert" hidden></p>
+  <p class="muted small" id="detail-note"></p>
+  <div class="chart-box"><canvas id="score-chart" aria-label="Daily anomaly score with severity thresholds" role="img"></canvas></div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Rainfall and river discharge</h2></div>
+  <div class="chart-box"><canvas id="weather-chart" aria-label="Daily rainfall and river discharge" role="img"></canvas></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/regions.js') }}"></script>
+{% endblock %}

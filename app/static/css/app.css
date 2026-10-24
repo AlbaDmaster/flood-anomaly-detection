@@ -82,3 +82,36 @@ button.primary:disabled { opacity: .6; cursor: wait; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .table { font-size: .85rem; }
 }
+
+/* charts, map and region cards */
+.two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.chart-box { position: relative; height: 300px; }
+.map { height: 300px; border-radius: 4px; background: #e3e8ee; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; color: var(--muted); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: -8px; }
+.dot-high { background: #c0392b; } .dot-moderate { background: #d68910; }
+.dot-normal { background: #2e7d32; } .dot-none { background: #8a96a3; }
+.region-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.region-card { text-align: left; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line);
+  border-left: 5px solid #8a96a3; border-radius: 4px; padding: 14px 16px; cursor: pointer; }
+.region-card:hover { border-color: var(--primary); }
+.region-card[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--primary); }
+.region-card.severity-high { border-left-color: #c0392b; }
+.region-card.severity-moderate { border-left-color: #d68910; }
+.region-card.severity-normal { border-left-color: #2e7d32; }
+.region-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.region-card p { margin: 2px 0 10px; }
+.region-card dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: .88rem; }
+.region-card dt { color: var(--muted); }
+.region-card dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.panel-head.wrap { flex-wrap: wrap; gap: 10px; }
+.range { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: .9rem; }
+.range input { padding: 6px 8px; border: 1px solid #7d8794; border-radius: 4px; font: inherit; }
+button.secondary { padding: 7px 14px; border: 1px solid var(--primary); border-radius: 4px; background: var(--panel);
+  color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+button.secondary:hover { background: var(--blue-bg); }
+
+@media (max-width: 1000px) {
+  .two-col { grid-template-columns: 1fr; }
+  .region-cards { grid-template-columns: 1fr; }
+}

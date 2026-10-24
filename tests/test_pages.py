@@ -91,6 +91,19 @@ def test_next_cannot_redirect_off_site(client, target):
     assert client.get("/login", query_string={"next": target}).headers["Location"] == "/"
 
 
-def test_static_files_are_served(client):
-    assert client.get("/static/css/app.css").status_code == 200
-    assert client.get("/static/js/api.js").status_code == 200
+def test_overview_and_regions_pages_have_charts_and_map(client):
+    sign_in(client, "public")
+    overview = client.get("/").data
+    assert b'id="trend-chart"' in overview and b'id="risk-map"' in overview and b"vendor/leaflet.js" in overview
+    regions = client.get("/regions")
+    assert regions.status_code == 200
+    assert b'id="region-cards"' in regions.data and b'id="score-chart"' in regions.data
+    assert b'id="weather-chart"' in regions.data and b"vendor/chart.umd.js" in regions.data
+
+
+@pytest.mark.parametrize("path", [
+    "/static/css/app.css", "/static/js/api.js", "/static/js/charts.js", "/static/js/regions.js",
+    "/static/vendor/chart.umd.js", "/static/vendor/leaflet.js", "/static/vendor/leaflet.css",
+])
+def test_static_files_are_served(client, path):
+    assert client.get(path).status_code == 200

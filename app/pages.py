@@ -68,8 +68,7 @@ def overview():
 @pages.get("/regions")
 @login_required
 def regions():
-    return render_template("coming_soon.html", active="pages.regions", title="Regions",
-                           note="Region cards, the risk map and the time-series charts are built next.")
+    return render_template("regions.html", active="pages.regions")
 
 
 @pages.get("/alerts")
