@@ -3,6 +3,10 @@
 {% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet.css') }}">{% endblock %}
 {% block heading %}Monitoring overview{% endblock %}
 {% block content %}
+<div class="banner" id="replay-banner" role="status" hidden>
+  <span id="replay-banner-text"></span>
+  {% if current_user.role == 'administrator' %}<a href="{{ url_for('pages.replay') }}">Replay controls</a>{% endif %}
+</div>
 <section class="kpis" aria-label="Summary">
   <div class="kpi kpi-green"><p>Regions monitored</p><strong id="kpi-regions">–</strong></div>
   <div class="kpi kpi-amber"><p>Active alerts</p><strong id="kpi-alerts">–</strong></div>
@@ -25,10 +29,12 @@
 </div>
 <section class="panel">
   <div class="panel-head"><h2>Recent alerts</h2><a href="{{ url_for('pages.alerts') }}">View all</a></div>
-  <table class="table">
+  <div class="table-wrap">
+  <table class="table" aria-label="Recent alerts">
     <thead><tr><th>Region</th><th>Date</th><th>Severity</th><th>Score</th><th>Status</th></tr></thead>
     <tbody id="recent-alerts"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
   </table>
+  </div>
 </section>
 <p class="muted small" id="updated"></p>
 {% endblock %}

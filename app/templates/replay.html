@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Replay demo{% endblock %}
+{% block heading %}Replay a past flood{% endblock %}
+{% block content %}
+<p class="lead">Feed a historical flood into the system one day at a time. Each day is scored by the model and raises alerts
+  exactly as live data would. The overview updates by itself while it runs; the regions and alerts pages show the new data when you reload them.</p>
+<div class="replay-grid">
+  <section class="panel">
+    <div class="panel-head"><h2>Set up</h2></div>
+    <form id="replay-form" class="replay-form" novalidate>
+      <fieldset class="presets">
+        <legend>Flood</legend>
+        <label class="preset"><input type="radio" name="preset" value="2024" checked>
+          <span><strong>April–May 2024 long rains</strong><span class="muted small">All three regions, 1 Apr to 31 May 2024</span></span></label>
+        <label class="preset"><input type="radio" name="preset" value="2018">
+          <span><strong>May 2018 Tana River flood</strong><span class="muted small">Tana River (Hola), 20 Apr to 15 May 2018, reaches high severity</span></span></label>
+        <label class="preset"><input type="radio" name="preset" value="custom">
+          <span><strong>Custom dates</strong><span class="muted small">Any range between 2015 and 2024</span></span></label>
+      </fieldset>
+      <div class="custom" id="custom" hidden>
+        <label>From <input type="date" id="r-start" min="2015-01-01" max="2024-12-31"></label>
+        <label>To <input type="date" id="r-end" min="2015-01-01" max="2024-12-31"></label>
+        <fieldset class="region-picks" id="r-regions"><legend>Regions</legend></fieldset>
+      </div>
+      <label class="speed">Speed (can be changed while running)
+        <select id="r-delay">
+          <option value="0.5">Fast, half a second per day</option>
+          <option value="1">1 second per day</option>
+          <option value="2" selected>2 seconds per day</option>
+          <option value="4">4 seconds per day</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="r-reset" checked> Clear all current readings, scores, alerts and feedback first</label>
+      <p class="form-error" id="replay-error" role="alert" hidden></p>
+      <div class="controls">
+        <button type="submit" class="primary" id="start">Start replay</button>
+        <button type="button" class="secondary" id="pause" disabled>Pause</button>
+        <button type="button" class="secondary danger" id="stop" disabled>Stop</button>
+      </div>
+    </form>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>Progress</h2><span class="state" id="r-state" role="status" aria-live="polite">Idle</span></div>
+    <div class="progress" role="progressbar" aria-label="Replay progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="r-bar">
+      <span id="r-fill"></span>
+    </div>
+    <p class="progress-text" id="r-progress">No replay has run since the server started.</p>
+    <dl class="counters">
+      <div><dt>Readings loaded</dt><dd id="r-readings">0</dd></div>
+      <div><dt>Readings scored</dt><dd id="r-scored">0</dd></div>
+      <div><dt>Alerts raised</dt><dd id="r-alerts">0</dd></div>
+    </dl>
+    <h3>Latest alerts</h3>
+    <ul class="alert-feed" id="r-feed"><li class="muted">Alerts appear here as the replay raises them.</li></ul>
+    <p class="muted small">Open the <a href="{{ url_for('pages.overview') }}" target="_blank" rel="noopener">overview in a new tab</a> to watch the cards, map and trend update.</p>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/replay.js') }}"></script>{% endblock %}

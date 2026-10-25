@@ -2,7 +2,9 @@
 {% block title %}Register{% endblock %}
 {% block body_class %}auth-page{% endblock %}
 {% block body %}
-<main class="auth-card">
+<main class="auth-wrap">
+<p class="auth-brand"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 19c3.5-4 7-4 10.5 0s7 4 11.5 0"/><path d="M5 12c3.5-4 7-4 10.5 0s7 4 11.5 0"/></svg> Flood EWS</p>
+<div class="auth-card">
   <h1>Create an account</h1>
   <p class="subtitle">Public accounts can view regions and alerts</p>
   <form id="register-form" novalidate>
@@ -18,6 +20,8 @@
     <button type="submit" class="primary">Create account</button>
   </form>
   <p class="switch">Already registered? <a href="{{ url_for('pages.login') }}">Sign in</a></p>
+</div>
+<p class="auth-foot">Isolation Forest flood anomaly detection for Nairobi, Kisumu and Tana River (Hola)</p>
 </main>
 {% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/auth.js') }}"></script>{% endblock %}

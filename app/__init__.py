@@ -37,10 +37,12 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     from app.auth import auth
     from app.cli import register_cli
     from app.pages import pages
+    from app.replay import replay_api
     from app.routes import api
     app.register_blueprint(api)
     app.register_blueprint(auth)
     app.register_blueprint(pages)
+    app.register_blueprint(replay_api)
     register_cli(app)
 
     return app

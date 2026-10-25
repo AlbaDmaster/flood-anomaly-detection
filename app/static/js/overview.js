@@ -1,7 +1,8 @@
 // Overview page: summary cards, anomaly score trend, risk map and recent alerts.
-// Refreshes every 15 seconds (only while the tab is visible) so a running
-// replay shows up live.
+// Refreshes every 15 seconds while the tab is visible, and every 3 seconds
+// while a replay is running so the demo updates live.
 const REFRESH_MS = 15000;
+const FAST_REFRESH_MS = 3000;
 let trendChart = null;
 let riskMap = null;
 const markers = {};
@@ -111,11 +112,30 @@ function renderRecentAlerts(alerts) {
   }
 }
 
+let replayActive = false;
+let refreshTimer = null;
+
+function renderReplayBanner(replay) {
+  replayActive = ["starting", "running", "paused"].includes(replay.state);
+  const banner = document.getElementById("replay-banner");
+  banner.hidden = !replayActive;
+  if (replayActive) {
+    const where = replay.current_date ? `now showing ${replay.current_date}` : "loading history";
+    const paused = replay.state === "paused" ? " (paused)" : "";
+    document.getElementById("replay-banner-text").textContent =
+      `Replaying ${replay.start} to ${replay.end}${paused}: day ${replay.day} of ${replay.total_days}, ${where}. ` +
+      `${replay.alerts} alerts raised so far.`;
+  }
+}
+
 async function loadOverview() {
   if (busy) return;
   busy = true;
   try {
-    const [{ regions }, recent] = await Promise.all([api("/api/regions"), api("/api/alerts?per_page=5")]);
+    const [{ regions }, recent, { replay }] = await Promise.all([
+      api("/api/regions"), api("/api/alerts?per_page=5"), api("/api/replay"),
+    ]);
+    renderReplayBanner(replay);
     renderKpis(regions);
     renderMap(regions);
     renderRecentAlerts(recent.alerts);
@@ -125,9 +145,18 @@ async function loadOverview() {
     document.getElementById("updated").textContent = "Could not load data: " + error.message;
   } finally {
     busy = false;
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(tick, replayActive ? FAST_REFRESH_MS : REFRESH_MS);
+  }
+}
+
+function tick() {
+  if (document.hidden) {
+    refreshTimer = setTimeout(tick, REFRESH_MS);
+  } else {
+    loadOverview();
   }
 }
 
 loadOverview();
-setInterval(() => { if (!document.hidden) loadOverview(); }, REFRESH_MS);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) loadOverview(); });

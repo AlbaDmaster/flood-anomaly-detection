@@ -135,18 +135,11 @@ def ingest_live(slugs: list[str], days: int = 30, echo=print) -> dict[str, int]:
     return results
 
 
-def replay(slugs: list[str], start, end, history_days: int = 30, delay: float = 0.0,
-           echo=print, after_day=None) -> int:
-    """
-    Load `history_days` days before `start` in one go (so the model has
-    context for lags and rolling windows), then feed `start`..`end` one day
-    at a time, waiting `delay` seconds between days. If given, `after_day()`
-    runs after the history load and after every day (used to score new
-    readings and raise alerts as they arrive).
-    """
+def replay_window(slugs: list[str], start, end, history_days: int = 30):
+    """Validate a replay request and return (start, end, rows from start-history_days to end)."""
     start, end = pd.Timestamp(start).normalize(), pd.Timestamp(end).normalize()
     if end < start:
-        raise ValueError("--end must be on or after --start")
+        raise ValueError("end must be on or after start")
     for slug in slugs:
         get_region(slug)
 
@@ -157,10 +150,22 @@ def replay(slugs: list[str], start, end, history_days: int = 30, delay: float = 
             f"Replay data covers {first.date()} to {last.date()}; "
             f"choose dates inside that range (history included)."
         )
-
     window = master[
         (master["date"] >= start - pd.Timedelta(days=history_days)) & (master["date"] <= end)
     ]
+    return start, end, window
+
+
+def replay(slugs: list[str], start, end, history_days: int = 30, delay: float = 0.0,
+           echo=print, after_day=None) -> int:
+    """
+    Load `history_days` days before `start` in one go (so the model has
+    context for lags and rolling windows), then feed `start`..`end` one day
+    at a time, waiting `delay` seconds between days. If given, `after_day()`
+    runs after the history load and after every day (used to score new
+    readings and raise alerts as they arrive).
+    """
+    start, end, window = replay_window(slugs, start, end, history_days)
     total = 0
 
     if history_days:

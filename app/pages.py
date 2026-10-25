@@ -20,6 +20,7 @@ NAV = [
     ("pages.regions", "Regions", None),
     ("pages.alerts", "Alerts", None),
     ("pages.users", "Users", ("administrator",)),
+    ("pages.replay", "Replay demo", ("administrator",)),
 ]
 
 
@@ -77,6 +78,12 @@ def regions():
 def alerts():
     return render_template("alerts.html", active="pages.alerts",
                            can_act=current_user.role in STAFF_ROLES)
+
+
+@pages.get("/replay")
+@roles_required("administrator")
+def replay():
+    return render_template("replay.html", active="pages.replay")
 
 
 @pages.get("/users")
