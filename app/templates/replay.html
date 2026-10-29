@@ -3,7 +3,7 @@
 {% block heading %}Replay a past flood{% endblock %}
 {% block content %}
 <p class="lead">Feed a historical flood into the system one day at a time. Each day is scored by the model and raises alerts
-  exactly as live data would. The overview updates by itself while it runs; the regions and alerts pages show the new data when you reload them.</p>
+  exactly as live data would, and high alerts are emailed to responders, authorities and administrators. The overview updates by itself while it runs; the regions and alerts pages show the new data when you reload them.</p>
 <div class="replay-grid">
   <section class="panel">
     <div class="panel-head"><h2>Set up</h2></div>
@@ -49,6 +49,7 @@
       <div><dt>Readings loaded</dt><dd id="r-readings">0</dd></div>
       <div><dt>Readings scored</dt><dd id="r-scored">0</dd></div>
       <div><dt>Alerts raised</dt><dd id="r-alerts">0</dd></div>
+      <div><dt>Emails sent</dt><dd id="r-emails">0</dd></div>
     </dl>
     <h3>Latest alerts</h3>
     <ul class="alert-feed" id="r-feed"><li class="muted">Alerts appear here as the replay raises them.</li></ul>

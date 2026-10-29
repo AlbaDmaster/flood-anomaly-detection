@@ -94,6 +94,8 @@ button.primary:disabled, button.secondary:disabled { opacity: .45; cursor: not-a
 .status { text-transform: capitalize; }
 .status-pending { color: var(--moderate); font-weight: 600; }
 .status-acknowledged { color: var(--normal); }
+.status-sent { color: var(--water-dark); font-weight: 600; }
+.status-failed { color: var(--high); font-weight: 600; }
 
 /* ---------- overview ---------- */
 .banner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: center;
@@ -194,7 +196,7 @@ dialog h3 { font-size: 1rem; margin: 20px 0 8px; }
 .progress span { display: block; height: 100%; width: 0; border-radius: inherit; transition: width .4s ease;
   background: linear-gradient(90deg, var(--water), var(--water-light)); }
 .progress-text { margin: 10px 0 14px; font-variant-numeric: tabular-nums; }
-.counters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.counters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; }
 .counters div { padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 8px; }
 .counters dt { font-size: .8rem; color: var(--muted); }
 .counters dd { margin: 2px 0 0; font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -232,6 +234,6 @@ body.auth-page { min-height: 100vh; display: grid; place-items: center; padding:
   .account { margin: 0 0 0 auto; padding: 0; border: 0; text-align: right; }
   .content { padding: 18px 16px 32px; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .counters { grid-template-columns: 1fr 1fr 1fr; }
+  .counters { grid-template-columns: 1fr 1fr; }
   .table { font-size: .85rem; }
 }

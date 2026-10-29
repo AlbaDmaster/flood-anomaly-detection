@@ -5,24 +5,38 @@ Command-line ingestion and scoring, run from the project root:
   flask --app run replay --start 2024-04-01 --end 2024-05-31 --delay 2
   flask --app run score                       score any readings not scored yet
   flask --app run reset-readings              wipe readings (e.g. before a demo)
+  flask --app run notify                      email HIGH alerts that were not sent (or failed)
+  flask --app run send-test-email --to you@example.com
 
-Ingestion commands score new readings and raise alerts straight away;
-add --no-score to only load data.
+Ingestion commands score new readings and raise alerts straight away, and
+HIGH alerts are emailed (see app/notifications.py); add --no-score to only
+load data.
 """
 import click
 
-from app import ingestion, scoring
+from app import ingestion, notifications, scoring
 
 
 def report(results: list[dict]) -> None:
     for r in results:
         if r["alert"]:
-            click.echo(f"    ALERT {r['severity'].upper():8s} {r['region']:16s} {r['date']}  score {r['anomaly_score']:.3f}")
+            email = {"sent": "  emailed", "failed": "  EMAIL FAILED"}.get(r.get("email"), "")
+            click.echo(f"    ALERT {r['severity'].upper():8s} {r['region']:16s} {r['date']}  "
+                       f"score {r['anomaly_score']:.3f}{email}")
 
 
 def summary(results: list[dict]) -> str:
     alerts = sum(r["alert"] for r in results)
-    return f"{len(results)} readings scored, {alerts} alerts raised"
+    text = f"{len(results)} readings scored, {alerts} alerts raised"
+    sent = sum(r.get("email") == "sent" for r in results)
+    failed = sum(r.get("email") == "failed" for r in results)
+    if sent or failed:
+        text += f", {sent} emailed"
+        if notifications.backend() == "console":
+            text += " (printed above because MAIL_SERVER is not set in .env)"
+    if failed:
+        text += f", {failed} emails failed (fix the mail settings in .env, then run: flask --app run notify)"
+    return text
 
 
 def register_cli(app):
@@ -82,6 +96,30 @@ def register_cli(app):
             raise click.ClickException(str(exc))
         report(scored)
         click.echo(f"Done: {summary(scored)}.")
+
+    @app.cli.command("notify")
+    def notify_command():
+        """Email every HIGH alert that has not been sent yet, including ones that failed before."""
+        alerts = notifications.unsent_high_alerts()
+        if not alerts:
+            click.echo("No unsent high alerts.")
+            return
+        outcome = notifications.send_alert_emails(alerts)
+        printed = " (printed above because MAIL_SERVER is not set in .env)" if notifications.backend() == "console" else ""
+        click.echo(f"Done: {outcome['sent']} sent{printed}, {outcome['failed']} failed.")
+        if outcome["error"]:
+            raise click.ClickException(outcome["error"])
+
+    @app.cli.command("send-test-email")
+    @click.option("--to", required=True, help="Address to send the test message to.")
+    def send_test_email_command(to):
+        """Check the mail settings in .env by sending one test message."""
+        try:
+            notifications.send_test_email(to)
+        except Exception as exc:  # show any SMTP or network problem plainly
+            raise click.ClickException(f"Could not send: {type(exc).__name__}: {exc}")
+        where = "printed above (MAIL_SERVER is not set)" if notifications.backend() == "console" else f"sent to {to}"
+        click.echo(f"Test email {where}.")
 
     @app.cli.command("reset-readings")
     @click.confirmation_option(prompt="This deletes ALL readings, anomalies, alerts and feedback. Continue?")

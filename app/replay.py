@@ -11,7 +11,8 @@ replay runs; the regions and alerts pages show the new data when reloaded.
   POST /api/replay/stop     administrator
   POST /api/replay/speed    administrator: {"delay": seconds per day}
 
-Each day is loaded and scored exactly like `flask --app run replay`. The
+Each day is loaded and scored exactly like `flask --app run replay`,
+including the emails for HIGH alerts. The
 runner lives in the web server process, so it is meant for the single-process
 development server used in demos, not for a multi-worker deployment.
 """
@@ -73,7 +74,8 @@ class ReplayRunner:
                 "state": "starting", "start": start_ts.date().isoformat(), "end": end_ts.date().isoformat(),
                 "regions": slugs, "delay": delay, "history_days": history_days, "reset": reset,
                 "day": 0, "total_days": len(days), "current_date": None,
-                "new_readings": 0, "scored": 0, "alerts": 0, "recent_alerts": [],
+                "new_readings": 0, "scored": 0, "alerts": 0, "emails_sent": 0, "emails_failed": 0,
+                "recent_alerts": [],
                 "message": None, "started_at": datetime.now().isoformat(timespec="seconds"),
             }
             self._thread = threading.Thread(
@@ -88,6 +90,8 @@ class ReplayRunner:
             self._status["new_readings"] += readings
             self._status["scored"] += len(results)
             self._status["alerts"] += len(alerts)
+            self._status["emails_sent"] += sum(r.get("email") == "sent" for r in alerts)
+            self._status["emails_failed"] += sum(r.get("email") == "failed" for r in alerts)
             recent = [{"region": r["region"], "date": r["date"], "severity": r["severity"],
                        "anomaly_score": r["anomaly_score"]} for r in alerts]
             self._status["recent_alerts"] = (recent[::-1] + self._status["recent_alerts"])[:RECENT_ALERTS_KEPT]
@@ -116,6 +120,9 @@ class ReplayRunner:
                         break
                 stopped = self._stop.is_set()
                 message = "Stopped by an administrator." if stopped else "Replay complete."
+                if self.status()["emails_failed"]:
+                    message += (f" {self.status()['emails_failed']} alert emails failed; check the mail"
+                                " settings in .env, then run: flask --app run notify")
                 if self.status()["new_readings"] == 0:
                     message += (" No new readings were added because these days were already loaded;"
                                 " tick 'Clear all current readings' to replay them.")

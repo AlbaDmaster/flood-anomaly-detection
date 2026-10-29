@@ -88,8 +88,8 @@ def test_missing_day_blocks_scoring_until_it_arrives():
 
 def test_known_flood_peak_raises_a_high_alert_and_normal_days_do_not():
     ingestion.replay(["tana_river_hola"], "2018-05-01", "2018-05-08", history_days=10,
-                     after_day=lambda: scoring.score_pending(["tana_river_hola"]), **QUIET)
-    peak = anomaly_on("tana_river_hola", "2018-05-07")
+                     after_day=lambda: scoring.score_pending(["tana_river_hola"], notify=False), **QUIET)
+    peak = anomaly_on("tana_river_hola", "2018-05-07")  # emailing is tested in test_notifications.py
     assert peak.severity_level == "high"
     alert = db.session.execute(db.select(Alert).filter_by(anomaly_id=peak.anomaly_id)).scalar_one()
     assert alert.status == "pending" and alert.channel == "dashboard"

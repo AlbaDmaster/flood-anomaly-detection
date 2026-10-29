@@ -1,6 +1,7 @@
 """
-Reads settings from .env (never committed): the database connection and the
-SECRET_KEY that signs login session cookies. URL.create escapes any special
+Reads settings from .env (never committed): the database connection, the
+SECRET_KEY that signs login session cookies, and the optional mail settings
+used to email high-severity alerts. URL.create escapes any special
 characters in the password, so it never has to be hand-encoded.
 """
 import os
@@ -37,3 +38,12 @@ def database_url(database: str | None = None) -> str:
 def secret_key() -> str | None:
     load_dotenv(ROOT / ".env")
     return os.getenv("SECRET_KEY")
+
+
+MAIL_KEYS = ("MAIL_SERVER", "MAIL_PORT", "MAIL_USERNAME", "MAIL_PASSWORD", "MAIL_FROM", "MAIL_BACKEND", "APP_URL")
+
+
+def mail_settings() -> dict:
+    """Mail settings present in .env (all optional). Without MAIL_SERVER, alert emails are printed instead of sent."""
+    load_dotenv(ROOT / ".env")
+    return {key: os.environ[key].strip() for key in MAIL_KEYS if os.getenv(key, "").strip()}

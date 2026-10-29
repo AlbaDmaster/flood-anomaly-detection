@@ -5,7 +5,9 @@ Isolation Forest for its region (src/model/predict.py), and saves the result:
   ANOMALY - one row per scored reading: anomaly score and severity
             (normal, moderate or high, from the per-region thresholds).
   ALERT   - one row per moderate or high anomaly, status 'pending', shown on
-            the dashboard (email delivery comes later).
+            the dashboard. HIGH alerts are then emailed to responders,
+            authorities and administrators (app/notifications.py), which
+            sets their status to 'sent' or 'failed'.
 
 A reading is scored only when the 8 consecutive days ending on it are all in
 SENSOR_READING (the lag-7 and 7-day rolling features need them). Readings
@@ -15,10 +17,12 @@ missing days arrive. Re-running never scores a reading twice.
 from datetime import timedelta
 
 import pandas as pd
+from flask import current_app
 
 from app.extensions import db
 from app.ingestion import READING_COLUMNS, all_region_slugs, get_region
 from app.models import Alert, Anomaly, SensorReading
+from app.notifications import send_alert_emails
 from src.model.predict import MIN_HISTORY_DAYS, predict_anomaly
 
 ALERT_SEVERITIES = ("moderate", "high")
@@ -44,9 +48,14 @@ def _region_frame(region_id: int, since) -> pd.DataFrame:
     return frame.set_index("date")
 
 
-def score_pending(slugs: list[str] | None = None) -> list[dict]:
-    """Score all unscored readings for the given regions (default: all). Returns one dict per new score."""
+def score_pending(slugs: list[str] | None = None, notify: bool = True) -> list[dict]:
+    """
+    Score all unscored readings for the given regions (default: all) and email
+    any new HIGH alerts (unless notify=False). Returns one dict per new score;
+    alert results carry "email": "sent", "failed" or None (not emailed).
+    """
     results = []
+    new_alerts = []
     for slug in slugs or all_region_slugs():
         region = get_region(slug)
         pending = db.session.execute(
@@ -73,8 +82,21 @@ def score_pending(slugs: list[str] | None = None) -> list[dict]:
             )
             db.session.add(anomaly)
             raised = result["severity"] in ALERT_SEVERITIES
+            alert = None
             if raised:
-                db.session.add(Alert(anomaly=anomaly, message=alert_message(region, reading, result)))
-            results.append({**result, "alert": raised})
+                alert = Alert(anomaly=anomaly, message=alert_message(region, reading, result))
+                db.session.add(alert)
+                new_alerts.append(alert)
+            results.append({**result, "alert": raised, "_alert": alert})
         db.session.commit()
+
+    if notify and new_alerts:
+        try:
+            send_alert_emails(new_alerts)
+        except Exception:  # email must never stop scoring; the alerts stay pending for `flask --app run notify`
+            db.session.rollback()
+            current_app.logger.exception("Sending alert emails failed")
+    for r in results:
+        alert = r.pop("_alert")
+        r["email"] = alert.status if alert is not None and alert.status in ("sent", "failed") else None
     return results

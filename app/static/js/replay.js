@@ -62,6 +62,8 @@ function render(status) {
   document.getElementById("r-readings").textContent = status.new_readings ?? 0;
   document.getElementById("r-scored").textContent = status.scored ?? 0;
   document.getElementById("r-alerts").textContent = status.alerts ?? 0;
+  const failed = status.emails_failed ?? 0;
+  document.getElementById("r-emails").textContent = `${status.emails_sent ?? 0}${failed ? ` (${failed} failed)` : ""}`;
 
   const feed = document.getElementById("r-feed");
   feed.replaceChildren();

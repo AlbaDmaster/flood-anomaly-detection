@@ -1,7 +1,7 @@
 """
 Flask application factory. Builds the app, points SQLAlchemy at the MySQL
 database described in .env, sets up login sessions, and registers the API
-routes and the command-line commands (ingest-live, replay, score, users ...).
+routes and the command-line commands (ingest-live, replay, score, notify, users ...).
 
 Start the server from the project root with: python run.py
 """
@@ -9,7 +9,7 @@ from datetime import timedelta
 
 from flask import Flask
 
-from app.config import database_url, secret_key
+from app.config import database_url, mail_settings, secret_key
 from app.extensions import db, login_manager
 
 
@@ -23,6 +23,11 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=14)
     if config_overrides:
         app.config.update(config_overrides)
+    if app.config.get("TESTING"):
+        app.config.setdefault("MAIL_BACKEND", "memory")  # tests never send real email
+    else:
+        for key, value in mail_settings().items():
+            app.config.setdefault(key, value)
     if "SQLALCHEMY_DATABASE_URI" not in app.config:
         app.config["SQLALCHEMY_DATABASE_URI"] = database_url()
     if not app.config.get("SECRET_KEY"):
