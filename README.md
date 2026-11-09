@@ -135,6 +135,28 @@ cd flood-anomaly-detection && source venv/bin/activate
 
 The Open-Meteo archive is published a few days behind real time, so the newest live reading is usually a few days old.
 
+## Daily scheduled job
+
+`scripts/daily_job.sh` runs live ingestion for the last 7 days: new readings are stored and scored, alerts raised and high alerts emailed. It starts MySQL if needed, skips a run if the previous one is still going, and appends everything to `logs/daily_job.log`. Days already stored are skipped, so a missed morning is filled in by the next run.
+
+**Windows with WSL:** WSL only runs while it is open, so the job is scheduled with Windows Task Scheduler, which starts WSL and MySQL itself. Run this **inside WSL**, from the project folder:
+
+```bash
+schtasks.exe /Create /TN "Flood EWS daily job" /SC DAILY /ST 06:00 /TR "wsl.exe -d $WSL_DISTRO_NAME -u root -- bash $PWD/scripts/daily_job.sh" /F
+powershell.exe -NoProfile -Command 'Set-ScheduledTask -TaskName "Flood EWS daily job" -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable)'
+schtasks.exe /Run /TN "Flood EWS daily job"
+```
+
+This creates the task for 06:00 every day, lets it run on battery and catch up if the computer was asleep, and runs it once straight away. The task runs while you are signed in to Windows. To remove it: `schtasks.exe /Delete /TN "Flood EWS daily job" /F`.
+
+**Linux server:** add it to root's crontab with `sudo crontab -e`:
+
+```
+0 6 * * * bash /path/to/flood-anomaly-detection/scripts/daily_job.sh
+```
+
+See what it did with `tail -n 30 logs/daily_job.log`.
+
 ## Replay demo
 
 1. Sign in as an administrator and open **Replay demo**.
