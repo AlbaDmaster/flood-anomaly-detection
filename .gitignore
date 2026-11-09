@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 reports/model_report.html
+reports/figures/model_scores_*.png
